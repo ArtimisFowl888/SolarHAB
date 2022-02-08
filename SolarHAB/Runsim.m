@@ -1,6 +1,6 @@
 
-
-gfs = "2022-02-05 12:00:00";
+addpath('functions')
+gfs = "2021-08-13 12:00:00";
 start_time = "2022-02-8 13:30:00";
 
 %% Balloon
@@ -48,16 +48,54 @@ earth_properties.albedo=0.17;  % assumption
 
 grib.lat_range=40;  % (.25 deg)
 grib.lon_range=40;  % (.25 deg)
-grib.hours=24;
+grib.hours=1;
 grib.res=0.25;  % (deg) Do not change
 grib.start = datetime(gfs);
-grib.file_name = "gfs."+year(grib.start)+num2str(month(grib.start),'%02.f')+num2str(day(grib.start),'%02.f')+"/"+num2str(hour(grib.start),'%02.f')+"/atmos/"+"gfs.t"+num2str(hour(grib.start),'%02.f')+"z.pgrb2.0p25.f"+num2str(grib.hours,'%03.f')
+grib.file_name = "gfs."+year(grib.start)+num2str(month(grib.start),'%02.f')+num2str(day(grib.start),'%02.f')+"/"+num2str(hour(grib.start),'%02.f')+"/atmos/"+"gfs.t"+num2str(hour(grib.start),'%02.f')+"z.pgrb2.0p25.f"+num2str(grib.hours,'%03.f');
 grib.ncfilename = "forcast\nc\" +year(grib.start)+num2str(month(grib.start),'%02.f')+num2str(day(grib.start),'%02.f')+"_"+num2str(hour(grib.start),'%02.f')+'nomad.nc';
 
+NCDF.matfilename = "forcast\mat\" +year(grib.start)+num2str(month(grib.start),'%02.f')+num2str(day(grib.start),'%02.f')+"_"+num2str(hour(grib.start),'%02.f')+'AWS.mat';
 
-if datetime('now')-datetime(gfs,'InputFormat','yyyy-MM-dd hh:mm:ss') > 216
-    server = 'neci';
+if datetime('now')-datetime(gfs,'InputFormat','yyyy-MM-dd hh:mm:ss') > duration(hours(216))
+    server = 'AWS';
+    try
+        load(NCDF.matfilename);
+        sprintf("loading:" +year(grib.start)+num2str(month(grib.start),'%02.f')+num2str(day(grib.start),'%02.f')+"_"+num2str(hour(grib.start),'%02.f')+'AWS.mat')
+    catch
+        sprintf("downloading from:"+server)
+        [NCDF, grib] = AWSGFS(grib,simulation);
+    end
+    
 else
     server = 'nomad';
-     NCDF = nomadGFS(grib,simulation);
+    try
+        load(NCDF.matfilename);
+        sprintf("loading:" +year(grib.start)+num2str(month(grib.start),'%02.f')+num2str(day(grib.start),'%02.f')+"_"+num2str(hour(grib.start),'%02.f')+'AWS.mat')
+    catch
+        sprintf("downloading from:"+server)
+        [NCDF, grib] = nomadGFS(grib,simulation);
+    end
+
 end
+
+%% Radation
+
+Rad.I0 = 1358;               % Direct Solar Radiation Level
+Rad.e = 0.016708;            % Eccentricity of Earth's Orbit
+Rad.P0 = 10132;             % Standard Atmospheric Pressure at Sea Level
+Rad.cloudElev = 3000;        % (m)
+Rad.cloudFrac = 0.0;         % Percent cloud coverage [0,1]
+Rad.cloudAlbedo = .65;       % [0,1]
+Rad.albedoGround = .2;       % Ground albedo [0,1]
+Rad.tGround = 293;           % (K) Temperature of Ground
+Rad.emissGround = .95;       % [0,1]
+Rad.SB = 5.670373E-8;        % Stefan Boltzman Constant
+Rad.RE = 6371000;            % (m) Radius of Earth
+Rad.radRef= .1;              % [0,1] Balloon Reflectivity
+Rad.radTrans = .1;           % [0,1] Balloon Transmitivity
+Rad.yday = day(simulation.start_time,'dayofyear');
+Rad.Parea = 0.25*pi*balloon.d*balloon.d;
+Rad.Sarea = pi*balloon.d*balloon.d;
+
+    
+    
