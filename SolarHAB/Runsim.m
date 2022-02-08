@@ -1,6 +1,6 @@
 
 
-gfs = "2022-02-05 06:00:00";
+gfs = "2022-02-05 12:00:00";
 start_time = "2022-02-8 13:30:00";
 
 %% Balloon
@@ -52,6 +52,8 @@ grib.hours=24;
 grib.res=0.25;  % (deg) Do not change
 grib.start = datetime(gfs);
 grib.file_name = "gfs."+year(grib.start)+num2str(month(grib.start),'%02.f')+num2str(day(grib.start),'%02.f')+"/"+num2str(hour(grib.start),'%02.f')+"/atmos/"+"gfs.t"+num2str(hour(grib.start),'%02.f')+"z.pgrb2.0p25.f"+num2str(grib.hours,'%03.f')
+grib.ncfilename = "forcast\nc\" +year(grib.start)+num2str(month(grib.start),'%02.f')+num2str(day(grib.start),'%02.f')+"_"+num2str(hour(grib.start),'%02.f')+'nomad.nc';
+
 
 if datetime('now')-datetime(gfs,'InputFormat','yyyy-MM-dd hh:mm:ss') > 216
     server = 'neci';
