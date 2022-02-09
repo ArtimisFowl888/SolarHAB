@@ -20,6 +20,14 @@ for i=1:grib.hours+1
     NCDF = TMPread(grib,NCDF,i);
     
 end
+grib.lati = find(NCDF.Lat==round(simulation.start_coord.lat/grib.res)*grib.res);
+grib.loni = find(NCDF.Lon==round((simulation.start_coord.lon+180)/grib.res)*grib.res);
+NCDF.Lat = NCDF.Lat(grib.lati-40:grib.lati+40);
+NCDF.Lon = NCDF.Lon(grib.loni-40:grib.loni+40);
+NCDF.UGRD = NCDF.UGRD(grib.loni-40:grib.loni+40,grib.lati-40:grib.lati+40,:,:);
+NCDF.VGRD = NCDF.VGRD(grib.loni-40:grib.loni+40,grib.lati-40:grib.lati+40,:,:);
+NCDF.HGT = NCDF.HGT(grib.loni-40:grib.loni+40,grib.lati-40:grib.lati+40,:,:);
+NCDF.TMP = NCDF.TMP(grib.loni-40:grib.loni+40,grib.lati-40:grib.lati+40,:,:);
 NCDF.matfilename = "forcast\mat\" +year(grib.start)+num2str(month(grib.start),'%02.f')+num2str(day(grib.start),'%02.f')+"_"+num2str(hour(grib.start),'%02.f')+'nomad.mat';
 save(NCDF.matfilename,'NCDF', '-v7.3')
 end
