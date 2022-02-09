@@ -1,6 +1,6 @@
 
 addpath('functions')
-gfs = "2021-08-13 12:00:00";
+gfs = "2021-08-11 12:00:00";
 start_time = "2022-02-8 13:30:00";
 
 %% Balloon
